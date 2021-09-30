@@ -530,15 +530,10 @@ def test_resolve_specific(config, manifest_extended, redshift_adapter, get_inclu
         ctx['adapter'].dispatch('macro_a').macro
 
     assert ctx['adapter'].dispatch('some_macro').macro is package_rs_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'dbt']).macro is rs_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'root']).macro is package_rs_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'root', 'dbt']).macro is package_rs_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'dbt', 'root']).macro is rs_macro
-
+    assert ctx['adapter'].dispatch('some_macro', macro_namespace=
+                                   'dbt').macro is rs_macro
+    assert ctx['adapter'].dispatch('some_macro', macro_namespace=
+                                   'root').macro is package_rs_macro
 
 def test_resolve_default(config_postgres, manifest_extended, postgres_adapter, get_include_paths):
     dbt_macro = manifest_extended.macros['macro.dbt.default__some_macro']
@@ -555,14 +550,10 @@ def test_resolve_default(config_postgres, manifest_extended, postgres_adapter, g
         ctx['adapter'].dispatch('macro_a').macro
 
     assert ctx['adapter'].dispatch('some_macro').macro is package_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'dbt']).macro is dbt_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'root']).macro is package_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'root', 'dbt']).macro is package_macro
-    assert ctx['adapter'].dispatch('some_macro', packages=[
-                                   'dbt', 'root']).macro is dbt_macro
+    assert ctx['adapter'].dispatch('some_macro', macro_namespace=
+                                   'dbt').macro is dbt_macro
+    assert ctx['adapter'].dispatch('some_macro', macro_namespace=
+                                   'root').macro is package_macro
 
 
 def test_resolve_errors(config, manifest_extended, redshift_adapter, get_include_paths):
@@ -580,4 +571,9 @@ def test_resolve_errors(config, manifest_extended, redshift_adapter, get_include
         ctx['adapter'].dispatch('namespace.no_default_exists')
     assert '"." is not a valid macro name component' in str(exc.value)
     assert 'adapter.dispatch' in str(exc.value)
-    assert 'packages=["namespace"]' in str(exc.value)
+    assert 'macro_namespace="namespace"' in str(exc.value)
+
+    with pytest.raises(dbt.exceptions.CompilationException) as exc:
+        ctx['adapter'].dispatch('no_default_exists', packages=['namespace'])
+    assert 'The "packages" argument of adapter.dispatch() has been deprecated.' in str(exc.value)
+    assert 'Raised during dispatch for: no_default_exists' in str(exc.value)
