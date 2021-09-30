@@ -573,6 +573,7 @@ def test_resolve_errors(config, manifest_extended, redshift_adapter, get_include
     assert 'adapter.dispatch' in str(exc.value)
     assert 'macro_namespace="namespace"' in str(exc.value)
 
+    # testing that we error out when the packages arg is used since it's deprecated
     with pytest.raises(dbt.exceptions.CompilationException) as exc:
         ctx['adapter'].dispatch('no_default_exists', packages=['namespace'])
     assert 'The "packages" argument of adapter.dispatch() has been deprecated.' in str(exc.value)
