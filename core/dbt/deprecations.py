@@ -43,20 +43,6 @@ class DBTDeprecation:
             active_deprecations.add(self.name)
 
 
-class DispatchPackagesDeprecation(DBTDeprecation):
-    _name = 'dispatch-packages'
-    _description = '''\
-    The "packages" argument of adapter.dispatch() has been deprecated.
-    Use the "macro_namespace" argument instead.
-
-    Raised during dispatch for: {macro_name}
-
-    For more information, see:
-
-    https://docs.getdbt.com/reference/dbt-jinja-functions/dispatch
-    '''
-
-
 class ModelsKeyNonModelDeprecation(DBTDeprecation):
     _name = 'models-key-mismatch'
 
@@ -119,7 +105,6 @@ def warn(name, *args, **kwargs):
 active_deprecations: Set[str] = set()
 
 deprecations_list: List[DBTDeprecation] = [
-    DispatchPackagesDeprecation(),
     ModelsKeyNonModelDeprecation(),
     PackageRedirectDeprecation()
 ]
